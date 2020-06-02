@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 
+import { todos } from './firebase'
+
 import TaskList from './TaskList'
 
 export default function Home() {
@@ -11,6 +13,17 @@ export default function Home() {
         if(e.key !== 'Enter') return
         setTasks([...tasks, newTask])
         setNewTask('')
+        todos.get().then(q => {
+            q.forEach(el => {
+                console.log(el.data())
+            })
+        })
+    }
+
+    function handleOnDelete(idx) {
+        const tmp = [...tasks]
+        tmp.splice(idx, 1)
+        setTasks(tmp)
     }
 
     return (
@@ -24,7 +37,7 @@ export default function Home() {
                 placeholder="Add a new task" />
             
             <div className="uk-margin">
-                <TaskList tasks={tasks} />
+                <TaskList tasks={tasks} onDelete={handleOnDelete} />
             </div>
         </div>
     )
