@@ -7,24 +7,35 @@ import TaskList from './TaskList'
 export default function Home() {
     
     const [newTask, setNewTask] = useState('')
-    // const [tasks, setTasks] = useState(['Buy milk', 'Cook dinner'])
+    const [loading, setLoading] = useState(true)
+    const [tasks, setTasks] = useState([])
+
+    useEffect(() => {
+        const unsubscribe = todos.onSnapshot(snapshot => {
+            const tmpTasks = [...tasks]
+            snapshot.docs.forEach(doc => {
+                tmpTasks.push({
+                    ...doc.data(),
+                    id: doc.id
+                })
+            })
+            setTasks(tmpTasks)
+            setLoading(false)
+        })
+        return unsubscribe
+    }, [])
 
     function handleKeyPress(e) {
         if(e.key !== 'Enter') return
         if(!newTask) return
-        // setTasks([...tasks, newTask])
+        setTasks([...tasks, newTask])
         setNewTask('')
-        todos.get().then(q => {
-            q.forEach(el => {
-                console.log(el.data())
-            })
-        })
     }
 
     function handleOnDelete(idx) {
-        // const tmp = [...tasks]
-        // tmp.splice(idx, 1)
-        // setTasks(tmp)
+        const tmp = [...tasks]
+        tmp.splice(idx, 1)
+        setTasks(tmp)
     }
 
     return (
@@ -38,7 +49,13 @@ export default function Home() {
                 placeholder="Add a new task" />
             
             <div className="uk-margin">
-                <TaskList onDelete={handleOnDelete} />
+                {
+                    loading
+                    ?
+                    <div>Loading...</div>
+                    :
+                    <TaskList tasks={tasks} onDelete={handleOnDelete} />
+                }
             </div>
         </div>
     )
