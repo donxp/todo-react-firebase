@@ -7,6 +7,7 @@ import TaskList from './TaskList'
 export default function Home() {
     
     const [newTask, setNewTask] = useState('')
+    const [newTaskLoading, setNewTaskLoading] = useState(false)
     const [loading, setLoading] = useState(true)
     const [tasks, setTasks] = useState([])
 
@@ -28,14 +29,22 @@ export default function Home() {
     function handleKeyPress(e) {
         if(e.key !== 'Enter') return
         if(!newTask) return
-        setTasks([...tasks, newTask])
+
+        setNewTaskLoading(true)
+        todos.add({
+            task: newTask
+        }).then(data => {
+            setNewTaskLoading(false)
+        }).catch(() => {
+            setNewTaskLoading(false)
+        })
         setNewTask('')
     }
 
     function handleOnDelete(idx) {
-        const tmp = [...tasks]
-        tmp.splice(idx, 1)
-        setTasks(tmp)
+        if(tasks[idx] === undefined) return
+
+        todos.doc(tasks[idx].id).delete()
     }
 
     return (
@@ -46,6 +55,7 @@ export default function Home() {
                 onKeyPress={handleKeyPress}
                 value={newTask}
                 onChange={e => setNewTask(e.target.value)}
+                disabled={newTaskLoading}
                 placeholder="Add a new task" />
             
             <div className="uk-margin">
